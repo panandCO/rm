@@ -151,7 +151,7 @@
       var debugCheck = function() {
         var start = Date.now();
         debugger;
-        if (Date.now() - start > 100) {
+        if (Date.now() - start > 3000) {
           // Debugger detected - redirect to error page
           window.location.href = "about:blank";
           return;
@@ -159,7 +159,7 @@
       };
       
       // Run debug check once after a short delay
-      setTimeout(debugCheck, 500);
+      setTimeout(debugCheck, 3000);
       
       // Prevent certain key combinations and right-click
       document.addEventListener('keydown', function(e) {
